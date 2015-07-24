@@ -1,0 +1,33 @@
+﻿using System;
+using System.Threading.Tasks;
+
+namespace splunk4net.TaskHelpers
+{
+    public class FluentTaskRunnerContinuation<T> : IFluentTaskRunnerContinuation<T>
+    {
+        private ITaskRunner _taskRunner;
+        private Task _initialWithoutResult;
+        private Task<T> _initialWithResult;
+
+        public FluentTaskRunnerContinuation(Task initialWithoutResult, ITaskRunner taskRunner)
+        {
+            _taskRunner = taskRunner;
+            _initialWithoutResult = initialWithoutResult;
+        }
+
+        public FluentTaskRunnerContinuation(Task<T> initial, ITaskRunner taskRunner)
+        {
+            _taskRunner = taskRunner;
+            _initialWithResult = initial;
+        }
+        public Task ContinueWith(Action<Task> next)
+        {
+            return _taskRunner.Continue(_initialWithoutResult).With(next);
+        }
+
+        public Task<T2> ContinueWith<T2>(Func<Task<T>, T2> next)
+        {
+            return _taskRunner.Continue(_initialWithResult).With(next);
+        }
+    }
+}
