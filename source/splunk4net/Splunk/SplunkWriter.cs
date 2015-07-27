@@ -32,9 +32,10 @@ namespace splunk4net.Splunk
                     await transmitter.SendAsync(jsonData, config.IndexName);
                     success = true;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     // one splunk log making it through marks success; allowing fail-over
+                    Console.WriteLine(ex.Message);
                 }
             }
             return success;

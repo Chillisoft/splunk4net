@@ -60,7 +60,7 @@
     <Compile Include="Buffering\LogBufferDatabase.cs" />
     <Compile Include="Splunk\AsyncLogResult.cs" />
     <Compile Include="Splunk\ISplunkWriterFactory.cs" />
-    <Compile Include="Splunk\SplunkAppender.cs" />
+    <Compile Include="SplunkAppender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Splunk\SplunkWriterConfig.cs" />
     <Compile Include="Splunk\SplunkWriter.cs" />

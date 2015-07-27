@@ -237,7 +237,7 @@ namespace splunk4net.Tests
         }
 
         [Test]
-        public void Construct_ShouldInstructTimerFactoryToCreateTimerToFlushBufferedLogsEvery10Minutes()
+        public void FirstAppend_ShouldInstructTimerFactoryToCreateTimerToFlushBufferedLogsEvery10Minutes()
         {
             //---------------Set up test pack-------------------
             var timerFactory = Substitute.For<ITimerFactory>();
@@ -268,6 +268,9 @@ namespace splunk4net.Tests
             var sut = Create(timerFactory: timerFactory, bufferDatabase: logBufferDatabase, factory:factory);
             factory.CreateFor(sut.Name).ReturnsForAnyArgs(ci => writer);
 
+            Assert.IsNull(configuredAction);
+            sut.DoAppend(CreateRandomLoggingEvent("log1"));
+
             //---------------Test Result -----------------------
             Assert.IsNotNull(configuredAction);
             Assert.AreEqual(600000, configuredInterval);
@@ -276,6 +279,8 @@ namespace splunk4net.Tests
             var secondItem = someItems.Last();
             Received.InOrder(() =>
             {
+                factory.CreateFor(sut.Name);    // first append does this; task runner should prevent cascading of actual log
+
                 logBufferDatabase.ListBufferedLogItems();
                 factory.CreateFor(sut.Name);
                 writer.Log(firstItem.Data);

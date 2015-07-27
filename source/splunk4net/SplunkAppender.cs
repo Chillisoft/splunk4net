@@ -9,14 +9,20 @@ using log4net.Appender;
 using log4net.Core;
 using Newtonsoft.Json;
 using splunk4net.Buffering;
+using splunk4net.Splunk;
 using splunk4net.TaskHelpers;
 using splunk4net.Timers;
-using System.Collections.Generic;
 
-namespace splunk4net.Splunk
+namespace splunk4net
 {
     public class SplunkAppender: AppenderSkeleton
     {
+
+        public string Index { get; set; }
+        public string RemoteUrl { get; set; }
+        public string Login { get; set; }
+        public string Password { get; set; }
+        public bool StoreForward { get; set; }
 
         public SplunkAppender(): this(new TaskRunner(),
                                         new SplunkWriterFactory(), 
@@ -44,6 +50,8 @@ namespace splunk4net.Splunk
         private readonly ISplunkWriterFactory _splunkWriterFactory;
         private ILogBufferDatabase _bufferDatabase;
         private ITimer _timer;
+        private bool _splunkConfigured;
+        private ITimerFactory _timerFactory;
         private const int TEN_MINUTES = 600000;
 
         internal SplunkAppender(ITaskRunner taskRunner,
@@ -51,23 +59,11 @@ namespace splunk4net.Splunk
                                 ILogBufferDatabase logBufferDatabase,
                                 ITimerFactory timerFactory)
         {
+            StoreForward = true;
             _taskRunner = taskRunner;
             _splunkWriterFactory = splunkWriterFactory;
             _bufferDatabase = logBufferDatabase;
-            _timer = timerFactory.CreateFor(SendUnsent, TEN_MINUTES);
-        }
-
-        private void SendUnsent()
-        {
-                var unsent = _bufferDatabase.ListBufferedLogItems();
-                unsent.ForEach(u =>
-                {
-                    lock(_lock)
-                    {
-                        var writer = _splunkWriterFactory.CreateFor(Name);
-                        AttemptSplunkLog(u.Data, writer, new AsyncLogResult() {BufferId = u.Id});
-                    }
-                });
+            _timerFactory = timerFactory;
         }
 
         protected override void OnClose()
@@ -82,9 +78,66 @@ namespace splunk4net.Splunk
 
         protected override void Append(LoggingEvent loggingEvent)
         {
+            DoFirstTimeSplunkConfigurationRegistration();
+            DoFirstTimeSendUnsent();
+            ActualizeLogEventPropertyData(loggingEvent);
             var serialized = JsonConvert.SerializeObject(loggingEvent);
-            var id = _bufferDatabase.Buffer(serialized);
+            var id = BufferIfAllowed(serialized);
             ScheduleSplunkLogFor(id, serialized);
+        }
+
+        private void DoFirstTimeSendUnsent()
+        {
+            lock(_lock)
+            {
+                if (_timer == null)
+                {
+                    _timer = _timerFactory.CreateFor(SendUnsent, TEN_MINUTES);
+                }
+            }
+        }
+
+        private static void ActualizeLogEventPropertyData(LoggingEvent loggingEvent)
+        {
+            loggingEvent.Fix = FixFlags.All;
+        }
+
+        private long BufferIfAllowed(string serialized)
+        {
+            return StoreForward ? _bufferDatabase.Buffer(serialized) : -1;
+        }
+
+        private void DoFirstTimeSplunkConfigurationRegistration()
+        {
+            lock(_lock)
+            {
+                if (_splunkConfigured)
+                    return;
+                RegisterConfiguredSplunkConfig();
+                _splunkConfigured = true;
+            }
+        }
+
+        private void RegisterConfiguredSplunkConfig()
+        {
+            var canConfigure = new[] {Index, RemoteUrl, Login, Password}
+                .Aggregate(true, (state, item) => state && !string.IsNullOrWhiteSpace(item));
+            if (!canConfigure)
+                return;
+            _splunkWriterFactory.RegisterConfigFor(Name, Index, RemoteUrl, Login, Password);
+        }
+
+        private void SendUnsent()
+        {
+            var unsent = _bufferDatabase.ListBufferedLogItems();
+            unsent.ForEach(u =>
+            {
+                lock (_lock)
+                {
+                    var writer = _splunkWriterFactory.CreateFor(Name);
+                    AttemptSplunkLog(u.Data, writer, new AsyncLogResult() { BufferId = u.Id });
+                }
+            });
         }
 
         private void ScheduleSplunkLogFor(long id, string serialized)
@@ -123,7 +176,7 @@ namespace splunk4net.Splunk
         private AsyncLogResult DebufferOnSuccess(Task<AsyncLogResult> lastTask)
         {
             var taskResult = lastTask.Result;
-            if (taskResult.Success)
+            if (taskResult.Success && taskResult.BufferId > 0)
                 _bufferDatabase.Unbuffer(taskResult.BufferId);
             return taskResult;
         }
