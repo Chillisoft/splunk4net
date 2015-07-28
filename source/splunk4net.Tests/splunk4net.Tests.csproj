@@ -69,7 +69,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Buffering\TestLogBufferDatabase.cs" />
+    <Compile Include="Buffering\TestLogBufferItemRepository.cs" />
     <Compile Include="Discovery.cs" />
     <Compile Include="ImmediateTaskRunnerBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>splunk4net</id>
+    <version>1.0.0</version>
+    <title>splunk4net</title>
+    <authors>Davyd McColl</authors>
+    <owners></owners>
+    <description>
+    A log4net appender which can log to the Splunk service with forward-buffering (which can be disabled)
+    </description>
+    <releaseNotes>
+    </releaseNotes>
+    <summary>
+      Splunk is a logging service which provides a query language and graphing capabilities. Splunk4Net uses
+      the Splunk.Client library to log your log4net logs to Splunk. Please see the github page for documentation.
+    </summary>
+    <language>en-US</language>
+    <projectUrl>https://github.com/fluffynuts/splunk4net</projectUrl>
+    <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/fluffynuts/splunk4net</licenseUrl>
+    <copyright>Copyright  2015</copyright>
+    <dependencies>
+        <group targetFramework="net40">
+          <dependency id="log4net" version="2.0.3" />
+          <dependency id="Newtonsoft.Json" version="7.0.1" />
+          <dependency id="Splunk.Client" version="2.1.2" />
+          <dependency id="System.Data.SQLite.Core" version="1.0.97.0" />
+        </group>
+    </dependencies>
+    <references></references>
+    <tags></tags>
+  </metadata>
+  <files>
+    <file src="lib\" target="lib" />
+    <file src="tools\" target="tools" />
+    <file src="content\" target="content" />
+  </files>
+</package>

@@ -15,7 +15,7 @@ using splunk4net.Buffering;
 namespace splunk4net.Tests.Buffering
 {
     [TestFixture]
-    public class TestLogBufferDatabase
+    public class TestLogBufferItemRepository
     {
         [Test]
         public void Constructor_ShouldCreateDatabase()
@@ -51,7 +51,7 @@ namespace splunk4net.Tests.Buffering
             Assert.IsTrue(File.Exists(first.BufferDatabasePath));
 
             //---------------Execute Test ----------------------
-            LogBufferDatabase second = null;
+            LogBufferItemRepository second = null;
             Assert.DoesNotThrow(() => second = Create(id));
 
             //---------------Test Result -----------------------
@@ -219,12 +219,74 @@ namespace splunk4net.Tests.Buffering
             Assert.That(item2.Created, Is.GreaterThan(item1.Created));
         }
 
+        [Test]
+        public void Trim_GivenTrimValue_WhenNothingToTrim_ShouldDoNothing()
+        {
+            //---------------Set up test pack-------------------
+            var sut = Create();
+
+            //---------------Assert Precondition----------------
+            CollectionAssert.IsEmpty(GetCurrentlyBufferedItemsIn(sut.ConnectionString));
+
+            //---------------Execute Test ----------------------
+            Assert.DoesNotThrow(() => sut.Trim(1024));
+
+            //---------------Test Result -----------------------
+            CollectionAssert.IsEmpty(GetCurrentlyBufferedItemsIn(sut.ConnectionString));
+
+        }
+
+        [Test]
+        public void Trim_GivenTrimValue_WhenTrimValueLargerThanBufferedAmount_ShouldDoNothing()
+        {
+            //---------------Set up test pack-------------------
+            var sut = Create();
+            var howMany = RandomValueGen.GetRandomInt(4, 8);
+            for (var i = 0; i < howMany; i++)
+                sut.Buffer(RandomValueGen.GetRandomString(10, 10));
+
+            //---------------Assert Precondition----------------
+            Assert.AreEqual(howMany, GetCurrentlyBufferedItemsIn(sut.ConnectionString).Count);
+
+            //---------------Execute Test ----------------------
+            Assert.DoesNotThrow(() => sut.Trim(10));
+
+            //---------------Test Result -----------------------
+            Assert.AreEqual(howMany, GetCurrentlyBufferedItemsIn(sut.ConnectionString).Count);
+
+        }
+
+        [Test]
+        public void Trim_GivenTrimValue_WhenTrimValueSmallerThanBufferedAmount_ShouldTrimOldest()
+        {
+            //---------------Set up test pack-------------------
+            var sut = Create();
+            var howMany = RandomValueGen.GetRandomInt(4, 8);
+            var ids = new List<long>();
+            for (var i = 0; i < howMany; i++)
+                ids.Add(sut.Buffer(RandomValueGen.GetRandomString(10, 10)));
+            ids.Reverse();
+            var expected = ids.Take(2).ToArray();
+            //---------------Assert Precondition----------------
+            Assert.AreEqual(howMany, GetCurrentlyBufferedItemsIn(sut.ConnectionString).Count);
+
+            //---------------Execute Test ----------------------
+            sut.Trim(2);
+
+            //---------------Test Result -----------------------
+            var remaining = GetCurrentlyBufferedItemsIn(sut.ConnectionString);
+            Assert.AreEqual(2, remaining.Count);
+            var reaminingIds = remaining.Select(r => r.Id).ToArray();
+            CollectionAssert.AreEquivalent(expected, reaminingIds);
+
+        }
+
         private List<string> _toDelete = new List<string>();
-        private LogBufferDatabase Create(string id = null)
+        private LogBufferItemRepository Create(string id = null)
         {
             var dbPath = Path.Combine(Path.GetTempPath(), (id ?? Guid.NewGuid() + ".db"));
             _toDelete.Add(dbPath);
-            return new LogBufferDatabase(dbPath);
+            return new LogBufferItemRepository(dbPath);
         }
 
         [TestFixtureTearDown]

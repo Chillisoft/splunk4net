@@ -12,6 +12,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.
 		{E85F08DB-F7F5-484E-8387-0052F6FC6FB8} = {E85F08DB-F7F5-484E-8387-0052F6FC6FB8}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "splunk4net.NugetPackage", "splunk4net.NugetPackage\splunk4net.NugetPackage.csproj", "{0451BAEF-DF2E-4B98-8644-94EE9415E389}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,9 @@ Global
 		{87D3B358-1A9B-48E4-8311-0176C13D04D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87D3B358-1A9B-48E4-8311-0176C13D04D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87D3B358-1A9B-48E4-8311-0176C13D04D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0451BAEF-DF2E-4B98-8644-94EE9415E389}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

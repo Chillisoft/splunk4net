@@ -9,21 +9,22 @@ using System.Text;
 
 namespace splunk4net.Buffering
 {
-    public interface ILogBufferDatabase
+    public interface ILogBufferItemRepository
     {
         long Buffer(string data);
         void Unbuffer(long id);
         List<LogBufferItem> ListBufferedLogItems();
+        void Trim(int maxRemaining);
     }
 
-    public class LogBufferDatabase: ILogBufferDatabase
+    public class LogBufferItemRepository: ILogBufferItemRepository
     {
         public string ConnectionString { get { return string.Format("Data Source={0};Version=3", BufferDatabasePath); } }
         public string BufferDatabasePath { get { return _dbPath; }}
         private readonly string _dbPath;
         private static readonly object _lock = new object();
 
-        public LogBufferDatabase(): this(GetBufferDatabasePathForApplication())
+        public LogBufferItemRepository(): this(GetBufferDatabasePathForApplication())
         {
         }
 
@@ -40,12 +41,51 @@ namespace splunk4net.Buffering
         {
             lock(_lock)
             {
-                ExecuteNonQueryWith(string.Format("delete from {0} where {1} = {2}",
-                    DataConstants.TABLE, DataConstants.ID, id));
+                UnbufferUnlocked(id);
             }
         }
 
-        internal LogBufferDatabase(string path)
+        public List<LogBufferItem> ListBufferedLogItems()
+        {
+            var result = new List<LogBufferItem>();
+            using (var disposer = new AutoDisposer())
+            {
+                var conn = disposer.Add(GetOpenConnection());
+                var cmd = disposer.Add(conn.CreateCommand());
+                cmd.CommandText = string.Format("select * from {0} order by {1} asc", DataConstants.TABLE, DataConstants.ID);
+                var reader = disposer.Add(cmd.ExecuteReader());
+                while (reader.Read())
+                    result.Add(new LogBufferItem(reader));
+            }
+            return result;
+        }
+
+        public void Trim(int maxRemaining)
+        {
+            var currentIds = new List<long>();
+            lock(_lock)
+            {
+                using (var disposer = new AutoDisposer())
+                {
+                    var conn = disposer.Add(GetOpenConnection());
+                    var cmd = disposer.Add(conn.CreateCommand());
+                    cmd.CommandText = string.Format("select {0} from {1} order by {0} desc;", 
+                        DataConstants.ID, DataConstants.TABLE);
+                    var reader = disposer.Add(cmd.ExecuteReader());
+                    while (reader.Read())
+                        currentIds.Add(Convert.ToInt32(reader[DataConstants.ID]));
+                }
+                currentIds.Skip(maxRemaining).ForEach(UnbufferUnlocked);
+            }
+        }
+
+        private void UnbufferUnlocked(long id)
+        {
+            ExecuteNonQueryWith(string.Format("delete from {0} where {1} = {2}",
+                DataConstants.TABLE, DataConstants.ID, id));
+        }
+
+        internal LogBufferItemRepository(string path)
         {
             _dbPath = path;
             CreateBufferDatabaseIfRequired();
@@ -140,20 +180,14 @@ namespace splunk4net.Buffering
                                 .Select(b => b.ToString("X2"))) + ".db";
             return Path.Combine(bufferBase, dbName);
         }
+    }
 
-        public List<LogBufferItem> ListBufferedLogItems()
+    public static class EnumerableExtensions
+    {
+        public static void ForEach<T>(this IEnumerable<T> collection, Action<T> toRun)
         {
-            var result = new List<LogBufferItem>();
-            using (var disposer = new AutoDisposer())
-            {
-                var conn = disposer.Add(GetOpenConnection());
-                var cmd = disposer.Add(conn.CreateCommand());
-                cmd.CommandText = string.Format("select * from {0} order by {1} asc", DataConstants.TABLE, DataConstants.ID);
-                var reader = disposer.Add(cmd.ExecuteReader());
-                while (reader.Read())
-                    result.Add(new LogBufferItem(reader));
-            }
-            return result;
+            foreach (var item in collection)
+                toRun(item);
         }
     }
 }

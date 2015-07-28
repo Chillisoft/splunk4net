@@ -22,11 +22,12 @@ namespace splunk4net
         public string RemoteUrl { get; set; }
         public string Login { get; set; }
         public string Password { get; set; }
+        public int MaxStore { get; set; }
         public bool StoreForward { get; set; }
 
         public SplunkAppender(): this(new TaskRunner(),
                                         new SplunkWriterFactory(), 
-                                        new LogBufferDatabase(GetBufferDatabasePathForApplication()),
+                                        new LogBufferItemRepository(GetBufferDatabasePathForApplication()),
                                         new TimerFactory())
         {
         }
@@ -48,7 +49,7 @@ namespace splunk4net
         private Task<AsyncLogResult> _lastSplunkTask;
         private readonly ITaskRunner _taskRunner;
         private readonly ISplunkWriterFactory _splunkWriterFactory;
-        private ILogBufferDatabase _bufferDatabase;
+        private ILogBufferItemRepository _bufferItemRepository;
         private ITimer _timer;
         private bool _splunkConfigured;
         private ITimerFactory _timerFactory;
@@ -56,13 +57,14 @@ namespace splunk4net
 
         internal SplunkAppender(ITaskRunner taskRunner,
                                 ISplunkWriterFactory splunkWriterFactory, 
-                                ILogBufferDatabase logBufferDatabase,
+                                ILogBufferItemRepository logBufferItemRepository,
                                 ITimerFactory timerFactory)
         {
             StoreForward = true;
+            MaxStore = 1024;
             _taskRunner = taskRunner;
             _splunkWriterFactory = splunkWriterFactory;
-            _bufferDatabase = logBufferDatabase;
+            _bufferItemRepository = logBufferItemRepository;
             _timerFactory = timerFactory;
         }
 
@@ -78,12 +80,17 @@ namespace splunk4net
 
         protected override void Append(LoggingEvent loggingEvent)
         {
-            DoFirstTimeSplunkConfigurationRegistration();
-            DoFirstTimeSendUnsent();
+            DoFirstTimeInitializations();
             ActualizeLogEventPropertyData(loggingEvent);
             var serialized = JsonConvert.SerializeObject(loggingEvent);
             var id = BufferIfAllowed(serialized);
             ScheduleSplunkLogFor(id, serialized);
+        }
+
+        private void DoFirstTimeInitializations()
+        {
+            DoFirstTimeSplunkConfigurationRegistration();
+            DoFirstTimeSendUnsent();
         }
 
         private void DoFirstTimeSendUnsent()
@@ -104,7 +111,7 @@ namespace splunk4net
 
         private long BufferIfAllowed(string serialized)
         {
-            return StoreForward ? _bufferDatabase.Buffer(serialized) : -1;
+            return StoreForward ? _bufferItemRepository.Buffer(serialized) : -1;
         }
 
         private void DoFirstTimeSplunkConfigurationRegistration()
@@ -129,7 +136,7 @@ namespace splunk4net
 
         private void SendUnsent()
         {
-            var unsent = _bufferDatabase.ListBufferedLogItems();
+            var unsent = _bufferItemRepository.ListBufferedLogItems();
             unsent.ForEach(u =>
             {
                 lock (_lock)
@@ -138,6 +145,7 @@ namespace splunk4net
                     AttemptSplunkLog(u.Data, writer, new AsyncLogResult() { BufferId = u.Id });
                 }
             });
+            _bufferItemRepository.Trim(MaxStore);
         }
 
         private void ScheduleSplunkLogFor(long id, string serialized)
@@ -177,7 +185,7 @@ namespace splunk4net
         {
             var taskResult = lastTask.Result;
             if (taskResult.Success && taskResult.BufferId > 0)
-                _bufferDatabase.Unbuffer(taskResult.BufferId);
+                _bufferItemRepository.Unbuffer(taskResult.BufferId);
             return taskResult;
         }
 
