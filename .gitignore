@@ -1,7 +1,3 @@
-#Quicksilver specific
-Installer/
-*.orig
-
 # Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
 [Bb]in/
 [Oo]bj/
@@ -138,11 +134,5 @@ target/
 source/UpgradeLog2.htm
 
 # Web libraries
-source/Web/node_modules/
-source/Web/Rapido.Azure.Web.Tests/node_modules/
-source/Web/Rapido.Azure.Web/Scripts/sjcl/
-source/Desktop/Rapido.Desktop.Habanero.Tests/x86/SQLite.Interop.dll
-source/Desktop/Rapido.Desktop.Habanero/Rapido.Desktop.Habanero.csproj.DotSettings
+node_modules
 *.swp
-/source/Web/Rapido.Azure.Web/Content/**/*.css
-/source/Web/Rapido.Azure.Web/Content/**/*.map
