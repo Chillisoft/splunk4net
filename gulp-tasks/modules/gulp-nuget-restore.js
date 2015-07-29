@@ -6,6 +6,7 @@ var q = require('q');
 var testUtilFinder = require('./testutil-finder');
 var tmp = require('tmp');
 var spawn = require('./spawn');
+var exec = require('./exec');
 var log = require('./log');
 
 var PLUGIN_NAME = 'gulp-dotcover';
@@ -49,6 +50,11 @@ function trim() {
 	return source.replace(regex, '');
 }
 
+function checkIfNugetIsAvailable(nugetPath, stream) {
+    var finder = process.platform == 'win32' ? 'where' : 'which';
+    return exec(finder, [nugetPath]);
+}
+
 function runNugetRestoreWith(stream, solutionFiles, options) {
     var solutions = solutionFiles.map(function(file) {
         return file.path.replace(/\\/g, '/');
@@ -57,31 +63,36 @@ function runNugetRestoreWith(stream, solutionFiles, options) {
         return fail(stream, 'No test assemblies defined');
     }
     var nuget = options.nuget || 'nuget.exe';
-    var puts = function(str) {
-        gutil.log(gutil.colors.yellow(str));
-    };
-    var opts = {
-        stdio: [process.stdin, process.stdout, process.stderr, 'pipe'],
-        cwd: process.cwd()
-    };
+    checkIfNugetIsAvailable(nuget, stream).then(function() {
+        var puts = function(str) {
+            gutil.log(gutil.colors.yellow(str));
+        };
+        var opts = {
+            stdio: [process.stdin, process.stdout, process.stderr, 'pipe'],
+            cwd: process.cwd()
+        };
 
-    var deferred = q.defer();
-    var final = solutions.reduce(function(promise, item) {
-        log.info('Restoring packages for: ' + item);
-        var args = [ 'restore', item];
-        return promise.then(function() {
-            return spawn(nuget, args, opts).then(function() {
-                'Packages restored for: ' + item;
+        var deferred = q.defer();
+        var final = solutions.reduce(function(promise, item) {
+            log.info('Restoring packages for: ' + item);
+            var args = [ 'restore', item];
+            return promise.then(function() {
+                return spawn(nuget, args, opts).then(function() {
+                    'Packages restored for: ' + item;
+                });
             });
+        }, deferred.promise);
+        final.then(function() {
+            end(stream);
+        }).catch(function(err) {
+            fail(stream, err);
         });
-    }, deferred.promise);
-    final.then(function() {
-        end(stream);
-    }).catch(function(err) {
-        fail(stream, err);
-    });
 
-    deferred.resolve();
+        deferred.resolve();
+    }).catch(function() {
+    log.error('Can\'t find nuget.exe. Either make sure it\'s in your path or explicitly provide a path in your nuget restore task options with the option "nuget"');
+    fail(stream, 'Can\'t restore packages: no nuget )\':');
+    });
 }
 
 module.exports = nugetRestore;

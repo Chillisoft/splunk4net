@@ -20,8 +20,8 @@ var exec = function(cmd, args, opts) {
                 stderr: stderr,
                 stdout: stdout
             });
-            deferred.resolve(stdout);
         }
+        deferred.resolve(stdout);
     });
     return deferred.promise;
 };
