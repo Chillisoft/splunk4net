@@ -117,3 +117,11 @@ session.
 Even if you configure from code (as above), you still need to kick things off 
 with an initial log. I'd suggest some kind of "the app has just started" log 
 which is a useful thing to see anyway.
+
+## Building from source
+
+* If you have Visual Studio, just load up and build.
+* If you don't or would prefer to build from the CLI
+	* NodeJS (splunk4net uses gulp for the build system)
+	* msbuild.exe in your path
+	* Nuget.exe in your path
