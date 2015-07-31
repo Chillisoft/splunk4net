@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>splunk4net</id>
+    <id>Chillisoft.splunk4net</id>
     <version>1.0.0</version>
     <title>splunk4net</title>
     <authors>Davyd McColl</authors>
-    <owners></owners>
+    <owners>Chillisoft</owners>
     <description>
     A log4net appender which can log to the Splunk service with forward-buffering (which can be disabled)
     </description>
@@ -16,10 +16,10 @@
       the Splunk.Client library to log your log4net logs to Splunk. Please see the github page for documentation.
     </summary>
     <language>en-US</language>
-    <projectUrl>https://github.com/fluffynuts/splunk4net</projectUrl>
+    <projectUrl>https://github.com/Chillisoft/splunk4net</projectUrl>
     <iconUrl>https://nuget.org/Content/Images/packageDefaultIcon-50x50.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <licenseUrl>https://github.com/fluffynuts/splunk4net</licenseUrl>
+    <licenseUrl>https://github.com/Chillisoft/splunk4net/LICENSE</licenseUrl>
     <copyright>Copyright  2015</copyright>
     <dependencies>
         <group targetFramework="net40">
