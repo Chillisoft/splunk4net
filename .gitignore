@@ -136,3 +136,6 @@ source/UpgradeLog2.htm
 # Web libraries
 node_modules
 *.swp
+*.nupkg
+*.nupkg.bak
+splunk4net.NugetPackage/lib
