@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using log4net.Appender;
 using log4net.Core;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using splunk4net.Buffering;
 using splunk4net.Splunk;
 using splunk4net.TaskHelpers;
@@ -78,13 +80,40 @@ namespace splunk4net
             }
         }
 
+        public class MyResolver : DefaultContractResolver, IContractResolver
+        {
+            protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+            {
+                return type.GetProperties()
+                    .Select(pi => new JsonProperty()
+                    {
+                        PropertyName = pi.Name,
+                        PropertyType = pi.PropertyType,
+                        Readable = true,
+                        Writable = true,
+                        ValueProvider = base.CreateMemberValueProvider(type.GetMember(pi.Name).First())
+                    }).ToList();
+            }
+
+            protected override JsonISerializableContract CreateISerializableContract(Type objectType)
+            {
+                var jsonISerializableContract = base.CreateISerializableContract(objectType);
+                return jsonISerializableContract;
+            }
+        }
+
         protected override void Append(LoggingEvent loggingEvent)
         {
             DoFirstTimeInitializations();
             ActualizeLogEventPropertyData(loggingEvent);
-            var serialized = JsonConvert.SerializeObject(loggingEvent);
+            var serialized = ConvertToJsonWithComplexMessageObjectsHandledProperly(loggingEvent);
             var id = BufferIfAllowed(serialized);
             ScheduleSplunkLogFor(id, serialized);
+        }
+
+        private static string ConvertToJsonWithComplexMessageObjectsHandledProperly(LoggingEvent loggingEvent)
+        {
+            return JsonConvert.SerializeObject(loggingEvent, Formatting.None, new JsonConverterWhichTriesHarderOnMessageObjects());
         }
 
         private void DoFirstTimeInitializations()

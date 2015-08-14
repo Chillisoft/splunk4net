@@ -1,11 +1,20 @@
 ﻿using System;
 using System.Net;
+using System.Security.AccessControl;
 using log4net;
 using log4net.Config;
 using log4net.Repository.Hierarchy;
+using Newtonsoft.Json;
 
 namespace TestApp
 {
+    public class Data
+    {
+        public string FirstPart { get; set; }
+        public string SecondPart { get; set; }
+        public Data Child { get; set; }
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -20,8 +29,10 @@ namespace TestApp
             Console.WriteLine("Write lines to log or Ctrl-C to quit");
             while(true)
             {
-                var data = Console.ReadLine();
+                var firstPart = Console.ReadLine();
+                var data = new Data() { FirstPart = firstPart, SecondPart = "bar", Child = new Data() { FirstPart = "first", SecondPart = "second" }}; 
                 log.Info(data);
+                log.Warn("As a string: " + firstPart);
             }
         }
 

@@ -90,9 +90,6 @@
       <Name>splunk4net</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="GenericBuilderTests-ExampleUsage.cs.txt" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\splunk4net\packages\System.Data.SQLite.Core.1.0.97.0\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('..\splunk4net\packages\System.Data.SQLite.Core.1.0.97.0\build\net45\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

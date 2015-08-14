@@ -58,6 +58,7 @@
     <Compile Include="Buffering\DataConstants.cs" />
     <Compile Include="Buffering\LogBufferItem.cs" />
     <Compile Include="Buffering\LogBufferItemRepository.cs" />
+    <Compile Include="JsonConverterWhichTriesHarderOnMessageObjects.cs" />
     <Compile Include="Splunk\AsyncLogResult.cs" />
     <Compile Include="Splunk\ISplunkWriterFactory.cs" />
     <Compile Include="SplunkAppender.cs" />
