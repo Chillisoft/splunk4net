@@ -7,8 +7,8 @@
     <ProjectGuid>{87D3B358-1A9B-48E4-8311-0176C13D04D9}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TestApp</RootNamespace>
-    <AssemblyName>TestApp</AssemblyName>
+    <RootNamespace>TestAppWithNoDirectReferences</RootNamespace>
+    <AssemblyName>TestAppWithNoDirectReferences</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>0aa521d0</NuGetPackageImportStamp>
@@ -53,6 +53,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data.cs" />
+    <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

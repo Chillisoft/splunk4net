@@ -4,8 +4,11 @@ using Newtonsoft.Json.Linq;
 
 namespace splunk4net
 {
-    public class JsonConverterWhichTriesHarderOnMessageObjects : JsonConverter
+    public class JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects : JsonConverter
     {
+        // log4net is designed more around flat data, but Splunk deals well with heirachies, so 
+        //  this class ensures that complex objects which were logged in the calling app are
+        //  logged at Splunk with their structure intact and available for query
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             var jToken = JToken.FromObject(value);
@@ -17,7 +20,11 @@ namespace splunk4net
                 var replace = JObject.FromObject(propVal);
                 jToken["Message"] = replace;
             }
-            catch { }
+            catch
+            {
+                // this will happen for any simple type (eg string) -- in this case, we don't mind as the default serialization
+                //  mechanism provides the expected results
+            }
             jToken.WriteTo(writer);
         }
 

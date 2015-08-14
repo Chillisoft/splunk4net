@@ -1,20 +1,11 @@
 ﻿using System;
 using System.Net;
-using System.Security.AccessControl;
 using log4net;
 using log4net.Config;
 using log4net.Repository.Hierarchy;
-using Newtonsoft.Json;
 
-namespace TestApp
+namespace TestAppWithNoDirectReferences
 {
-    public class Data
-    {
-        public string FirstPart { get; set; }
-        public string SecondPart { get; set; }
-        public Data Child { get; set; }
-    }
-
     class Program
     {
         static void Main(string[] args)
@@ -49,19 +40,6 @@ namespace TestApp
                     appender.SetProperty<string>("Password", "P4$$w0rd");
                 }
             }
-        }
-    }
-
-    public static class ObjectExtensions
-    {
-        public static void SetProperty<T>(this object obj, string propertyName, object value)
-        {
-            var propInfo = obj.GetType().GetProperty(propertyName);
-            if (propInfo == null)
-                return;
-            if (!typeof (T).IsAssignableFrom(propInfo.PropertyType))
-                return;
-            propInfo.SetValue(obj, value);
         }
     }
 }

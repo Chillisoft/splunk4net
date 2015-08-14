@@ -1,22 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using log4net;
 using log4net.Config;
 using log4net.Repository.Hierarchy;
 
 namespace TestAppUsingNugetPackage
 {
-    public class Data
-    {
-        public string FirstPart { get; set; }
-        public string SecondPart { get; set; }
-        public Data Child { get; set; }
-    }
-
     class Program
     {
         static void Main(string[] args)
@@ -51,19 +40,6 @@ namespace TestAppUsingNugetPackage
                     appender.SetProperty<string>("Password", "P4$$w0rd");
                 }
             }
-        }
-    }
-
-    public static class ObjectExtensions
-    {
-        public static void SetProperty<T>(this object obj, string propertyName, object value)
-        {
-            var propInfo = obj.GetType().GetProperty(propertyName);
-            if (propInfo == null)
-                return;
-            if (!typeof (T).IsAssignableFrom(propInfo.PropertyType))
-                return;
-            propInfo.SetValue(obj, value);
         }
     }
 }

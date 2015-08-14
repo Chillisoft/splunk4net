@@ -113,7 +113,7 @@ namespace splunk4net
 
         private static string ConvertToJsonWithComplexMessageObjectsHandledProperly(LoggingEvent loggingEvent)
         {
-            return JsonConvert.SerializeObject(loggingEvent, Formatting.None, new JsonConverterWhichTriesHarderOnMessageObjects());
+            return JsonConvert.SerializeObject(loggingEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects());
         }
 
         private void DoFirstTimeInitializations()

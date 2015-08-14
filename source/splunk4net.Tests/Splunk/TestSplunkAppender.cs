@@ -53,7 +53,7 @@ namespace splunk4net.Tests
             sut.DoAppend(loggingEvent);
 
             //---------------Test Result -----------------------
-            db.Received().Buffer(JsonConvert.SerializeObject(loggingEvent, Formatting.None, new JsonConverterWhichTriesHarderOnMessageObjects()));
+            db.Received().Buffer(JsonConvert.SerializeObject(loggingEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects()));
         }
 
         private static LoggingEvent CreateRandomLoggingEvent(string message = null)
@@ -109,7 +109,7 @@ namespace splunk4net.Tests
             writer.DidNotReceive().Log(Arg.Any<string>());
             logTask.Start();
             firstBarrier.SignalAndWait();
-            writer.Received().Log(JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichTriesHarderOnMessageObjects()));
+            writer.Received().Log(JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects()));
             db.DidNotReceive().Unbuffer(Arg.Any<long>());
         }
 
@@ -130,7 +130,7 @@ namespace splunk4net.Tests
             writer.Log(Arg.Any<string>())
                 .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor<bool>(() => true));
             var logEvent = CreateRandomLoggingEvent();
-            var json = JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichTriesHarderOnMessageObjects());
+            var json = JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects());
             var bufferId = RandomValueGen.GetRandomLong(100, 200);
             db.Buffer(json).Returns(bufferId);
 
@@ -166,7 +166,7 @@ namespace splunk4net.Tests
             writer.Log(Arg.Any<string>())
                 .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor<bool>(() => false));
             var logEvent = CreateRandomLoggingEvent();
-            var json = JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichTriesHarderOnMessageObjects());
+            var json = JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects());
             var bufferId = RandomValueGen.GetRandomLong(100, 200);
             db.Buffer(json).Returns(bufferId);
 
@@ -205,8 +205,8 @@ namespace splunk4net.Tests
                 .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor<bool>(() => true));
             var firstLogEvent = CreateRandomLoggingEvent("log1");
             var secondLogEvent = CreateRandomLoggingEvent("log2");
-            var json1 = JsonConvert.SerializeObject(firstLogEvent, Formatting.None, new JsonConverterWhichTriesHarderOnMessageObjects());
-            var json2 = JsonConvert.SerializeObject(secondLogEvent, Formatting.None, new JsonConverterWhichTriesHarderOnMessageObjects());
+            var json1 = JsonConvert.SerializeObject(firstLogEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects());
+            var json2 = JsonConvert.SerializeObject(secondLogEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects());
             db.Buffer(Arg.Any<string>()).ReturnsForAnyArgs(ci =>
             {
                 var data = ci.Arg<string>();

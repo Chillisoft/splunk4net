@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "splunk4net", "splunk4net\sp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "splunk4net.Tests", "splunk4net.Tests\splunk4net.Tests.csproj", "{01E035BD-45CC-4DB8-8A4B-11CD5CDD61D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{87D3B358-1A9B-48E4-8311-0176C13D04D9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAppWithNoDirectReferences", "TestAppWithNoDirectReferences\TestAppWithNoDirectReferences.csproj", "{87D3B358-1A9B-48E4-8311-0176C13D04D9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E85F08DB-F7F5-484E-8387-0052F6FC6FB8} = {E85F08DB-F7F5-484E-8387-0052F6FC6FB8}
 	EndProjectSection
