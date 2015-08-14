@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Chillisoft.splunk4net</id>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <title>splunk4net</title>
     <authors>Davyd McColl</authors>
     <owners>Chillisoft</owners>
