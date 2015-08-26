@@ -72,7 +72,7 @@ namespace splunk4net
 
         protected override void OnClose()
         {
-            lock(_lock)
+            lock(this)  // naughty, but log4net is calling OnClose in the finalizer and it appears that the original _lock object is null
             {
                 if (_timer != null)
                     _timer.Dispose();
@@ -124,7 +124,7 @@ namespace splunk4net
 
         private void DoFirstTimeSendUnsent()
         {
-            lock(_lock)
+            lock(this)  // naughty, etc
             {
                 if (_timer == null)
                 {
@@ -145,7 +145,7 @@ namespace splunk4net
 
         private void DoFirstTimeSplunkConfigurationRegistration()
         {
-            lock(_lock)
+            lock(this)  // naughty, etc
             {
                 if (_splunkConfigured)
                     return;
@@ -168,7 +168,7 @@ namespace splunk4net
             var unsent = _bufferItemRepository.ListBufferedLogItems();
             unsent.ForEach(u =>
             {
-                lock (_lock)
+                lock (this) // naughty, etc
                 {
                     var writer = _splunkWriterFactory.CreateFor(Name);
                     AttemptSplunkLog(u.Data, writer, new AsyncLogResult() { BufferId = u.Id });
@@ -180,7 +180,7 @@ namespace splunk4net
         private void ScheduleSplunkLogFor(long id, string serialized)
         {
             var writer = _splunkWriterFactory.CreateFor(Name);
-            lock(_lock)
+            lock(this) // naughty, etc
             {
                 var logResult = new AsyncLogResult() {BufferId = id};
                 AttemptSplunkLog(serialized, writer, logResult);
