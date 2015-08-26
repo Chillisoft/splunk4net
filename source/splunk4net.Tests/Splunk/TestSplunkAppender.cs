@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using NSubstitute;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
+using PeanutButter.Utils;
 using splunk4net.Buffering;
 using splunk4net.Splunk;
 using splunk4net.TaskHelpers;
@@ -332,5 +333,4 @@ namespace splunk4net.Tests
                 .Build();
         }
     }
-
 }

@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using log4net.Appender;
 using log4net.Core;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using splunk4net.Buffering;
 using splunk4net.Splunk;
 using splunk4net.TaskHelpers;
@@ -47,7 +46,7 @@ namespace splunk4net
             return Path.Combine(bufferBase, dbName);
         }
 
-        private object _lock = new object();
+        private SemaphoreSlim _lock = new SemaphoreSlim(1);
         private Task<AsyncLogResult> _lastSplunkTask;
         private readonly ITaskRunner _taskRunner;
         private readonly ISplunkWriterFactory _splunkWriterFactory;
@@ -72,34 +71,26 @@ namespace splunk4net
 
         protected override void OnClose()
         {
-            lock(this)  // naughty, but log4net is calling OnClose in the finalizer and it appears that the original _lock object is null
+            // OnClose is called within the Finalizer for SkeletonAppender (the base of this class)
+            //  Finalizers can be called before the object is fully constructed, so I've employed
+            //  a strategy very similar to sticking my fingers in my ears and saying "lalalalalala"
+            using (GetLock())
             {
-                if (_timer != null)
-                    _timer.Dispose();
-                _timer = null;
+                TryDispose(ref _timer);
+                TryDispose(ref _lock);
             }
         }
 
-        public class MyResolver : DefaultContractResolver, IContractResolver
+        private void TryDispose<T>(ref T disposable) where T: class, IDisposable
         {
-            protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
-            {
-                return type.GetProperties()
-                    .Select(pi => new JsonProperty()
-                    {
-                        PropertyName = pi.Name,
-                        PropertyType = pi.PropertyType,
-                        Readable = true,
-                        Writable = true,
-                        ValueProvider = base.CreateMemberValueProvider(type.GetMember(pi.Name).First())
-                    }).ToList();
-            }
+            var myCopy = disposable;
+            JustDo(() => myCopy.Dispose());
+            disposable = null;
+        }
 
-            protected override JsonISerializableContract CreateISerializableContract(Type objectType)
-            {
-                var jsonISerializableContract = base.CreateISerializableContract(objectType);
-                return jsonISerializableContract;
-            }
+        private void JustDo(Action action)
+        {
+            try { action(); } finally { }
         }
 
         protected override void Append(LoggingEvent loggingEvent)
@@ -124,7 +115,7 @@ namespace splunk4net
 
         private void DoFirstTimeSendUnsent()
         {
-            lock(this)  // naughty, etc
+            using (GetLock())
             {
                 if (_timer == null)
                 {
@@ -145,7 +136,7 @@ namespace splunk4net
 
         private void DoFirstTimeSplunkConfigurationRegistration()
         {
-            lock(this)  // naughty, etc
+            using (GetLock())
             {
                 if (_splunkConfigured)
                     return;
@@ -168,7 +159,7 @@ namespace splunk4net
             var unsent = _bufferItemRepository.ListBufferedLogItems();
             unsent.ForEach(u =>
             {
-                lock (this) // naughty, etc
+                using (GetLock())
                 {
                     var writer = _splunkWriterFactory.CreateFor(Name);
                     AttemptSplunkLog(u.Data, writer, new AsyncLogResult() { BufferId = u.Id });
@@ -180,9 +171,9 @@ namespace splunk4net
         private void ScheduleSplunkLogFor(long id, string serialized)
         {
             var writer = _splunkWriterFactory.CreateFor(Name);
-            lock(this) // naughty, etc
+            using (GetLock())
             {
-                var logResult = new AsyncLogResult() {BufferId = id};
+                var logResult = new AsyncLogResult() { BufferId = id };
                 AttemptSplunkLog(serialized, writer, logResult);
             }
         }
@@ -225,6 +216,11 @@ namespace splunk4net
                 lastResult.Success = writer.Log(data).Result;
                 return lastResult;
             };
+        }
+
+        private LenientAutoLocker GetLock()
+        {
+            return new LenientAutoLocker(_lock);
         }
     }
 }

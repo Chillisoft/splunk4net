@@ -59,6 +59,8 @@
     <Compile Include="Buffering\LogBufferItem.cs" />
     <Compile Include="Buffering\LogBufferItemRepository.cs" />
     <Compile Include="JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects.cs" />
+    <Compile Include="LenientAutoLocker.cs" />
+    <Compile Include="MyResolver.cs" />
     <Compile Include="Splunk\AsyncLogResult.cs" />
     <Compile Include="Splunk\ISplunkWriterFactory.cs" />
     <Compile Include="SplunkAppender.cs" />
