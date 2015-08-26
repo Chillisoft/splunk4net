@@ -90,7 +90,11 @@ namespace splunk4net
 
         private void JustDo(Action action)
         {
-            try { action(); } finally { }
+            try
+            {
+                action();
+            }
+            catch { }
         }
 
         protected override void Append(LoggingEvent loggingEvent)
