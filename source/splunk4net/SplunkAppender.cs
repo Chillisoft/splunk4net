@@ -28,7 +28,7 @@ namespace splunk4net
 
         public SplunkAppender(): this(new TaskRunner(),
                                         new SplunkWriterFactory(), 
-                                        new LogBufferItemRepositorySqlite(GetBufferDatabasePathForApplication()),
+                                        new LogBufferItemRepositoryFactory(), 
                                         new TimerFactory())
         {
         }
@@ -58,14 +58,14 @@ namespace splunk4net
 
         internal SplunkAppender(ITaskRunner taskRunner,
                                 ISplunkWriterFactory splunkWriterFactory, 
-                                ILogBufferItemRepository logBufferItemRepository,
+                                ILogBufferItemRepositoryFactory logBufferItemRepositoryFactory,
                                 ITimerFactory timerFactory)
         {
             StoreForward = true;
             MaxStore = 1024;
             _taskRunner = taskRunner;
             _splunkWriterFactory = splunkWriterFactory;
-            _bufferItemRepository = logBufferItemRepository;
+            _bufferItemRepository = logBufferItemRepositoryFactory.CreateRepository();
             _timerFactory = timerFactory;
         }
 

@@ -40,12 +40,20 @@ namespace splunk4net.Tests
             }
         }
 
+        private ILogBufferItemRepositoryFactory CreateSubstituteBufferFactoryWith(ILogBufferItemRepository repository = null)
+        {
+            var result = Substitute.For<ILogBufferItemRepositoryFactory>();
+            result.CreateRepository().Returns(repository ?? Substitute.For<ILogBufferItemRepository>());
+            return result;
+        }
+
         [Test]
         public void Append_ShouldBufferLog()
         {
             //---------------Set up test pack-------------------
             var db = Substitute.For<ILogBufferItemRepository>();
-            var sut = Create(bufferItemRepository: db);
+            var factory = CreateSubstituteBufferFactoryWith(db);
+            var sut = Create(bufferItemRepositoryFactory: factory);
 
             //---------------Assert Precondition----------------
 
@@ -74,6 +82,7 @@ namespace splunk4net.Tests
             var factory = Substitute.For<ISplunkWriterFactory>();
             var taskRunner = Substitute.For<ITaskRunner>();
             var db = Substitute.For<ILogBufferItemRepository>();
+            var dbFactory = CreateSubstituteBufferFactoryWith(db);
             Task<AsyncLogResult> logTask = null;
             var firstBarrier = new Barrier(2);
             var secondBarrier = new Barrier(2);
@@ -90,7 +99,7 @@ namespace splunk4net.Tests
                     return logTask;
                 });
                 
-            var sut = Create(taskRunner, factory, db);
+            var sut = Create(taskRunner, factory, dbFactory);
             sut.Name = RandomValueGen.GetRandomString(1, 10);
             var logEvent = CreateRandomLoggingEvent();
 
@@ -124,8 +133,9 @@ namespace splunk4net.Tests
                 .WithSupportForContinuationOfType<AsyncLogResult, AsyncLogResult>()
                 .Build();
             var db = Substitute.For<ILogBufferItemRepository>();
+            var dbFactory = CreateSubstituteBufferFactoryWith(db);
 
-            var sut = Create(taskRunner, factory, db);
+            var sut = Create(taskRunner, factory, dbFactory);
             var writer = Substitute.For<ISplunkWriter>();
             factory.CreateFor(sut.Name).ReturnsForAnyArgs(ci => writer);
             writer.Log(Arg.Any<string>())
@@ -160,8 +170,9 @@ namespace splunk4net.Tests
                 .WithSupportForContinuationOfType<AsyncLogResult, AsyncLogResult>()
                 .Build();
             var db = Substitute.For<ILogBufferItemRepository>();
+            var dbFactory = CreateSubstituteBufferFactoryWith(db);
 
-            var sut = Create(taskRunner, factory, db);
+            var sut = Create(taskRunner, factory, dbFactory);
             var writer = Substitute.For<ISplunkWriter>();
             factory.CreateFor(sut.Name).ReturnsForAnyArgs(ci => writer);
             writer.Log(Arg.Any<string>())
@@ -198,8 +209,9 @@ namespace splunk4net.Tests
                 .WithSupportForContinuationOfType<AsyncLogResult, AsyncLogResult>()
                 .Build();
             var db = Substitute.For<ILogBufferItemRepository>();
+            var dbFactory = CreateSubstituteBufferFactoryWith(db);
 
-            var sut = Create(taskRunner, factory, db);
+            var sut = Create(taskRunner, factory, dbFactory);
             var writer = Substitute.For<ISplunkWriter>();
             factory.CreateFor(sut.Name).ReturnsForAnyArgs(ci => writer);
             writer.Log(Arg.Any<string>())
@@ -259,12 +271,13 @@ namespace splunk4net.Tests
             var someItems = GetSomeRandomLogBufferItems();
             var logBufferDatabase = Substitute.For<ILogBufferItemRepository>();
             logBufferDatabase.ListBufferedLogItems().Returns(someItems);
+            var dbFactory = CreateSubstituteBufferFactoryWith(logBufferDatabase);
 
 
             //---------------Assert Precondition----------------
 
             //---------------Execute Test ----------------------
-            var sut = Create(timerFactory: timerFactory, bufferItemRepository: logBufferDatabase, factory:factory);
+            var sut = Create(timerFactory: timerFactory, bufferItemRepositoryFactory: dbFactory, factory:factory);
             factory.CreateFor(sut.Name).ReturnsForAnyArgs(ci => writer);
 
             Assert.IsNull(configuredAction);
@@ -314,12 +327,12 @@ namespace splunk4net.Tests
 
         private SplunkAppender Create(ITaskRunner taskRunner = null,
                                         ISplunkWriterFactory factory = null,
-                                        ILogBufferItemRepository bufferItemRepository = null,
+                                        ILogBufferItemRepositoryFactory bufferItemRepositoryFactory = null,
                                         ITimerFactory timerFactory = null)
         {
             var splunkAppender = new SplunkAppender(taskRunner ?? CreateImmediateTaskRunner(),
                 factory ?? Substitute.For<ISplunkWriterFactory>(),
-                bufferItemRepository ?? Substitute.For<ILogBufferItemRepository>(),
+                bufferItemRepositoryFactory ?? Substitute.For<ILogBufferItemRepositoryFactory>(),
                 timerFactory ?? Substitute.For<ITimerFactory>());
             splunkAppender.Name = RandomValueGen.GetRandomString(10, 20);
             return splunkAppender;

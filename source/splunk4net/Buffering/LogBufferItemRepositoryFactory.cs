@@ -10,7 +10,12 @@ using System.Threading.Tasks;
 
 namespace splunk4net.Buffering
 {
-    public class LogBufferItemRepositoryFactory
+    public interface ILogBufferItemRepositoryFactory
+    {
+        ILogBufferItemRepository CreateRepository();
+    }
+
+    public class LogBufferItemRepositoryFactory : ILogBufferItemRepositoryFactory
     {
         protected virtual string GetBufferDatabasePathForApplication()
         {
