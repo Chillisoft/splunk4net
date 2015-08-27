@@ -3,7 +3,15 @@ using System.Data.SQLite;
 
 namespace splunk4net.Buffering
 {
-    public class LogBufferItem
+    public interface ILogBufferItem
+    {
+        int Id { get; }
+        string Data { get; }
+        int? Retries { get; set; }
+        DateTime Created { get; }
+    }
+
+    public class LogBufferItem : ILogBufferItem
     {
         public int Id { get; private set;  }
         public string Data { get; private set; }

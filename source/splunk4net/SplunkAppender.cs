@@ -28,7 +28,7 @@ namespace splunk4net
 
         public SplunkAppender(): this(new TaskRunner(),
                                         new SplunkWriterFactory(), 
-                                        new LogBufferItemRepository(GetBufferDatabasePathForApplication()),
+                                        new LogBufferItemRepositorySqlite(GetBufferDatabasePathForApplication()),
                                         new TimerFactory())
         {
         }

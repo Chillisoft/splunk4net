@@ -3,11 +3,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
 using splunk4net.Buffering;
@@ -15,7 +11,7 @@ using splunk4net.Buffering;
 namespace splunk4net.Tests.Buffering
 {
     [TestFixture]
-    public class TestLogBufferItemRepository
+    public class TestLogBufferItemRepositorySqlite
     {
         [Test]
         public void Constructor_ShouldCreateDatabase()
@@ -51,7 +47,7 @@ namespace splunk4net.Tests.Buffering
             Assert.IsTrue(File.Exists(first.BufferDatabasePath));
 
             //---------------Execute Test ----------------------
-            LogBufferItemRepository second = null;
+            LogBufferItemRepositorySqlite second = null;
             Assert.DoesNotThrow(() => second = Create(id));
 
             //---------------Test Result -----------------------
@@ -282,11 +278,11 @@ namespace splunk4net.Tests.Buffering
         }
 
         private List<string> _toDelete = new List<string>();
-        private LogBufferItemRepository Create(string id = null)
+        private LogBufferItemRepositorySqlite Create(string id = null)
         {
             var dbPath = Path.Combine(Path.GetTempPath(), (id ?? Guid.NewGuid() + ".db"));
             _toDelete.Add(dbPath);
-            return new LogBufferItemRepository(dbPath);
+            return new LogBufferItemRepositorySqlite(dbPath);
         }
 
         [TestFixtureTearDown]

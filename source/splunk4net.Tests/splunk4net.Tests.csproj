@@ -69,7 +69,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Buffering\TestLogBufferItemRepository.cs" />
+    <Compile Include="Buffering\TestLogBufferItemRepositorySqlite.cs" />
+    <Compile Include="Buffering\TestLogBufferItemRepositoryInMemory.cs" />
     <Compile Include="Discovery.cs" />
     <Compile Include="ImmediateTaskRunnerBuilder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Splunk\TestSplunkWriter.cs" />
     <Compile Include="Splunk\TestSplunkWriterConfig.cs" />
     <Compile Include="TestAutoDisposer.cs" />
+    <Compile Include="TestLogBufferItemRepositoryFactory.cs" />
     <Compile Include="Timers\TestTimerFactory.cs" />
   </ItemGroup>
   <ItemGroup>

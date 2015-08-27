@@ -13,18 +13,18 @@ namespace splunk4net.Buffering
     {
         long Buffer(string data);
         void Unbuffer(long id);
-        List<LogBufferItem> ListBufferedLogItems();
+        IEnumerable<ILogBufferItem> ListBufferedLogItems();
         void Trim(int maxRemaining);
     }
 
-    public class LogBufferItemRepository: ILogBufferItemRepository
+    public class LogBufferItemRepositorySqlite: ILogBufferItemRepository
     {
         public string ConnectionString { get { return string.Format("Data Source={0};Version=3", BufferDatabasePath); } }
         public string BufferDatabasePath { get { return _dbPath; }}
         private readonly string _dbPath;
         private static readonly object _lock = new object();
 
-        public LogBufferItemRepository(): this(GetBufferDatabasePathForApplication())
+        public LogBufferItemRepositorySqlite(): this(GetBufferDatabasePathForApplication())
         {
         }
 
@@ -45,9 +45,9 @@ namespace splunk4net.Buffering
             }
         }
 
-        public List<LogBufferItem> ListBufferedLogItems()
+        public IEnumerable<ILogBufferItem> ListBufferedLogItems()
         {
-            var result = new List<LogBufferItem>();
+            var result = new List<ILogBufferItem>();
             using (var disposer = new AutoDisposer())
             {
                 var conn = disposer.Add(GetOpenConnection());
@@ -85,7 +85,7 @@ namespace splunk4net.Buffering
                 DataConstants.TABLE, DataConstants.ID, id));
         }
 
-        internal LogBufferItemRepository(string path)
+        internal LogBufferItemRepositorySqlite(string path)
         {
             _dbPath = path;
             CreateBufferDatabaseIfRequired();

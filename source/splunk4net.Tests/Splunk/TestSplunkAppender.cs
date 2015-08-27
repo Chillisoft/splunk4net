@@ -293,9 +293,9 @@ namespace splunk4net.Tests
             });
         }
 
-        private static List<LogBufferItem> GetSomeRandomLogBufferItems()
+        private static List<ILogBufferItem> GetSomeRandomLogBufferItems()
         {
-            var someItems = new List<LogBufferItem>(new[]
+            var someItems = new List<ILogBufferItem>(new[]
             {
                 CreateRandomLogBufferItem(),
                 CreateRandomLogBufferItem()

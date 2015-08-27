@@ -57,7 +57,9 @@
     <Compile Include="AutoDisposer.cs" />
     <Compile Include="Buffering\DataConstants.cs" />
     <Compile Include="Buffering\LogBufferItem.cs" />
-    <Compile Include="Buffering\LogBufferItemRepository.cs" />
+    <Compile Include="Buffering\LogBufferItemRepositoryInMemory.cs" />
+    <Compile Include="Buffering\LogBufferItemRepositorySqlite.cs" />
+    <Compile Include="Buffering\LogBufferItemRepositoryFactory.cs" />
     <Compile Include="JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects.cs" />
     <Compile Include="LenientAutoLocker.cs" />
     <Compile Include="MyResolver.cs" />
