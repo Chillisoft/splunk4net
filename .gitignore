@@ -138,4 +138,4 @@ node_modules
 *.swp
 *.nupkg
 *.nupkg.bak
-splunk4net.NugetPackage/lib
+source/splunk4net.NugetPackage/lib
