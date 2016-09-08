@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Splunk.Client;
 
-namespace splunk4net
+namespace splunk4net.Tests
 {
     public static class SearchResultExtensions
     {

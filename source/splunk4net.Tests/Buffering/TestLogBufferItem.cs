@@ -1,11 +1,9 @@
 ﻿using System;
-using NSubstitute;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
 using splunk4net.Buffering;
-using splunk4net.Tests.Buffering;
 
-namespace splunk4net.Tests
+namespace splunk4net.Tests.Buffering
 {
     [TestFixture]
     public class TestLogBufferItem

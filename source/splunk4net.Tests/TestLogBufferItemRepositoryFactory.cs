@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using NUnit.Framework;
 using splunk4net.Buffering;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace splunk4net.Tests
 {
     [TestFixture]
     public class TestLogBufferItemRepositoryFactory
     {
+#pragma warning disable S101 // Types should be named in camel case
+        // ReSharper disable once InconsistentNaming
         public class LogBufferItemRepositoryFactory_OVERRIDES_GetBufferDatabasePathForApplication: LogBufferItemRepositoryFactory
+#pragma warning restore S101 // Types should be named in camel case
         {
             public string OverridePath { get; set; }
 
@@ -60,8 +59,9 @@ namespace splunk4net.Tests
 
         private LogBufferItemRepositoryFactory CreateWithOverridePath(string overridePath)
         {
-            var result = new LogBufferItemRepositoryFactory_OVERRIDES_GetBufferDatabasePathForApplication();
-            result.OverridePath = overridePath;
+            var result = new LogBufferItemRepositoryFactory_OVERRIDES_GetBufferDatabasePathForApplication {
+                OverridePath = overridePath
+            };
             return result;
         }
     }

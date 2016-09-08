@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
 using PeanutButter.TestUtils.Generic;
 using splunk4net.Buffering;
+// ReSharper disable PossibleMultipleEnumeration
 
 namespace splunk4net.Tests.Buffering
 {

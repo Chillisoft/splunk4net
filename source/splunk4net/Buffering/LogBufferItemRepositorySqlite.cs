@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -19,11 +20,12 @@ namespace splunk4net.Buffering
 
     public class LogBufferItemRepositorySqlite: ILogBufferItemRepository
     {
-        public string ConnectionString { get { return string.Format("Data Source={0};Version=3", BufferDatabasePath); } }
-        public string BufferDatabasePath { get { return _dbPath; }}
+        public string ConnectionString => $"Data Source={BufferDatabasePath};Version=3";
+        public string BufferDatabasePath => _dbPath;
         private readonly string _dbPath;
         private static readonly object _lock = new object();
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public LogBufferItemRepositorySqlite(): this(GetBufferDatabasePathForApplication())
         {
         }
@@ -52,7 +54,7 @@ namespace splunk4net.Buffering
             {
                 var conn = disposer.Add(GetOpenConnection());
                 var cmd = disposer.Add(conn.CreateCommand());
-                cmd.CommandText = string.Format("select * from {0} order by {1} asc", DataConstants.TABLE, DataConstants.ID);
+                cmd.CommandText = $"select * from {DataConstants.TABLE} order by {DataConstants.ID} asc";
                 var reader = disposer.Add(cmd.ExecuteReader());
                 while (reader.Read())
                     result.Add(new LogBufferItem(reader));
@@ -69,8 +71,7 @@ namespace splunk4net.Buffering
                 {
                     var conn = disposer.Add(GetOpenConnection());
                     var cmd = disposer.Add(conn.CreateCommand());
-                    cmd.CommandText = string.Format("select {0} from {1} order by {0} desc;", 
-                        DataConstants.ID, DataConstants.TABLE);
+                    cmd.CommandText = $"select {DataConstants.ID} from {DataConstants.TABLE} order by {DataConstants.ID} desc;";
                     var reader = disposer.Add(cmd.ExecuteReader());
                     while (reader.Read())
                         currentIds.Add(Convert.ToInt32(reader[DataConstants.ID]));
@@ -81,8 +82,7 @@ namespace splunk4net.Buffering
 
         private void UnbufferUnlocked(long id)
         {
-            ExecuteNonQueryWith(string.Format("delete from {0} where {1} = {2}",
-                DataConstants.TABLE, DataConstants.ID, id));
+            ExecuteNonQueryWith($"delete from {DataConstants.TABLE} where {DataConstants.ID} = {id}");
         }
 
         internal LogBufferItemRepositorySqlite(string path)
@@ -131,6 +131,8 @@ namespace splunk4net.Buffering
         private void CreateDatabaseAt(string dbPath)
         {
             var dbFolder = Path.GetDirectoryName(dbPath);
+            if (dbFolder == null)
+                throw new InvalidOperationException("Unable to obtain temporary folder for buffering database");
             if (!Directory.Exists(dbFolder))
                 Directory.CreateDirectory(dbFolder);
             SQLiteConnection.CreateFile(dbPath);
@@ -150,16 +152,14 @@ namespace splunk4net.Buffering
 
         private static string GenerateTableCreateScript()
         {
-            return string.Format(@"create table {0}(
-                                {1} integer primary key, 
-                                {2} text not null, 
-                                {3} int,
-                                {4} datetime default current_timestamp);",
-                DataConstants.TABLE,
-                DataConstants.ID,
-                DataConstants.DATA,
-                DataConstants.RETRIES,
-                DataConstants.CREATED);
+            return
+                $@"create table {DataConstants.TABLE}(
+                                {DataConstants.ID} integer primary key, 
+                                {DataConstants
+                    .DATA} text not null, 
+                                {DataConstants.RETRIES} int,
+                                {DataConstants
+                        .CREATED} datetime default current_timestamp);";
         }
 
         private SQLiteConnection GetOpenConnection()

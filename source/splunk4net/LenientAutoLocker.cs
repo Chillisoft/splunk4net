@@ -10,19 +10,17 @@ namespace splunk4net
         public LenientAutoLocker(SemaphoreSlim semaphore)
         {
             _semaphore = semaphore;
-            if (_semaphore != null)
-                _semaphore.Wait();
+            _semaphore?.Wait();
         }
 
         public void Dispose()
         {
             try
             {
-                if (_semaphore != null)
-                    _semaphore.Release();
+                _semaphore?.Release();
                 _semaphore = null;
             }
-            finally { }
+            catch { /* do nothing, do not throw, on purpose, ever */ }
         }
     }
 }

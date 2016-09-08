@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using log4net.Core;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -20,17 +16,17 @@ namespace splunk4net.Tests
         [SetUp]
         public void SetUp()
         {
-            DisableSSLCertificateExceptions();
+            DisableSslCertificateExceptions();
         }
 
-        private static void DisableSSLCertificateExceptions()
+        private static void DisableSslCertificateExceptions()
         {
             ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true;
         }
 
         [Test]
         [Ignore("Discovery: requires splunk server at localhost")]
-        public async void LogToLocalHost()
+        public async Task LogToLocalHost()
         {
             //---------------Set up test pack-------------------
 
@@ -70,7 +66,7 @@ namespace splunk4net.Tests
 
         [Test]
         [Ignore("Discovery: requires splunk server at localhost")]
-        public async void TryFindLogsAtLocalHost()
+        public async Task TryFindLogsAtLocalHost()
         {
             //---------------Set up test pack-------------------
             const string indexName = "splunk4net";
@@ -96,7 +92,7 @@ namespace splunk4net.Tests
 
         [Test]
         [Ignore("Discovery: requires splunk server at localhost")]
-        public async void LogAndTestThatItHappened()
+        public async Task LogAndTestThatItHappened()
         {
             //---------------Set up test pack-------------------
             var index = "splunk4net";
@@ -121,7 +117,7 @@ namespace splunk4net.Tests
             //---------------Assert Precondition----------------
 
             //---------------Execute Test ----------------------
-            var searchString = string.Format("search index=\"{0}\" LoggerName=\"{1}\"", index, searchFor);
+            var searchString = $"search index=\"{index}\" LoggerName=\"{searchFor}\"";
             var job = await queryService.Jobs.CreateAsync(searchString);
             using (var stream = await job.GetSearchResultsAsync())
             {

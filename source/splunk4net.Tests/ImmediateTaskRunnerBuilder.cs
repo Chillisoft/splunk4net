@@ -2,6 +2,9 @@
 using System.Threading.Tasks;
 using NSubstitute;
 using splunk4net.TaskHelpers;
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMethodReturnValue.Global
+// ReSharper disable UnusedMember.Global
 
 namespace splunk4net.Tests
 {
@@ -38,13 +41,6 @@ namespace splunk4net.Tests
             return task;
         }
 
-        public static Task CreateImmediateTaskFor(Action action)
-        {
-            var task = Task.Run(action);
-            task.Wait();
-            return task;
-        }
-
         public static IContinuation CreateImmediateContinuationFor(Task initialTask)
         {
             var continuation = Substitute.For<IContinuation>();
@@ -74,9 +70,10 @@ namespace splunk4net.Tests
             return continuation;
         }
 
+        // ReSharper disable once UnusedMember.Global
         public ImmediateTaskRunnerBuilder WithNotStartedHandlerFor<T>()
         {
-            _taskRunner.CreateNotStartedFor<T>(Arg.Any<Func<T>>())
+            _taskRunner.CreateNotStartedFor(Arg.Any<Func<T>>())
                 .ReturnsForAnyArgs(ci => new Task<T>(ci.Arg<Func<T>>()));
             return this;
         }
@@ -89,14 +86,14 @@ namespace splunk4net.Tests
 
         public ImmediateTaskRunnerBuilder WithSupportForTaskOfType<T>()
         {
-            _taskRunner.Run<T>(Arg.Any<Func<T>>())
+            _taskRunner.Run(Arg.Any<Func<T>>())
                 .ReturnsForAnyArgs(ci =>
                 {
-                    var task = Task.Run<T>(() => ci.Arg<Func<T>>()());
+                    var task = Task.Run(() => ci.Arg<Func<T>>()());
                     task.Wait();
                     return task;
                 });
-            _taskRunner.CreateNotStartedFor<T>(Arg.Any<Func<T>>())
+            _taskRunner.CreateNotStartedFor(Arg.Any<Func<T>>())
                 .ReturnsForAnyArgs(ci => new Task<T>(ci.Arg<Func<T>>()));
             return this;
         }

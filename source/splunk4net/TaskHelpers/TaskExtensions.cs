@@ -4,6 +4,7 @@ namespace splunk4net.TaskHelpers
 {
     public static class TaskExtensions
     {
+        // ReSharper disable once UnusedMember.Global
         public static IFluentTaskRunnerContinuation<object> Using(this Task task, ITaskRunner taskRunner)
         {
             return new FluentTaskRunnerContinuation<object>(task, taskRunner);

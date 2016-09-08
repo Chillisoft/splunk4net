@@ -1,4 +1,5 @@
-﻿namespace TestAppUsingNugetPackage
+﻿// ReSharper disable UnusedAutoPropertyAccessor.Global
+namespace TestAppUsingNugetPackage
 {
     public class Data
     {

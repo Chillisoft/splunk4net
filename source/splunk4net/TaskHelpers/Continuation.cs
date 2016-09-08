@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace splunk4net.TaskHelpers
 {
     public class Continuation<T>: IContinuation<T>, IContinuation
     {
-        private Task<T> _ofTaskWithResult;
-        private Task _ofTaskWithoutResult;
+        private readonly Task<T> _ofTaskWithResult;
+        private readonly Task _ofTaskWithoutResult;
 
         public Continuation(Task<T> ofTaskWithResult)
         {

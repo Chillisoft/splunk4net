@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Data.SQLite;
+using System.Diagnostics.CodeAnalysis;
 
 namespace splunk4net.Buffering
 {
+    [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public interface ILogBufferItem
     {
         int Id { get; }
@@ -13,10 +16,10 @@ namespace splunk4net.Buffering
 
     public class LogBufferItem : ILogBufferItem
     {
-        public int Id { get; private set;  }
-        public string Data { get; private set; }
+        public int Id { get; }
+        public string Data { get; }
         public int? Retries { get; set; }
-        public DateTime Created { get; private set; }
+        public DateTime Created { get; }
         public LogBufferItem(int id, string data, DateTime created)
         {
             Id = id;
@@ -47,8 +50,7 @@ namespace splunk4net.Buffering
         public string AsInsertSql()
         {
             var quoted = (Data ?? "").Replace("'", "''");
-            return string.Format("insert into {0} ({1}) values ('{2}');",
-                DataConstants.TABLE, DataConstants.DATA, quoted);
+            return $"insert into {DataConstants.TABLE} ({DataConstants.DATA}) values ('{quoted}');";
         }
 
     }

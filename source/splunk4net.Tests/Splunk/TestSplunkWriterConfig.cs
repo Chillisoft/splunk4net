@@ -2,7 +2,7 @@ using NUnit.Framework;
 using PeanutButter.RandomGenerators;
 using splunk4net.Splunk;
 
-namespace splunk4net.Tests
+namespace splunk4net.Tests.Splunk
 {
     [TestFixture]
     public class TestSplunkWriterConfig

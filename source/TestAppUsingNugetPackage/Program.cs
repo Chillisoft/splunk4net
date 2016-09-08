@@ -10,6 +10,7 @@ namespace TestAppUsingNugetPackage
     {
         static void Main(string[] args)
         {
+            if (args == null) throw new ArgumentNullException(nameof(args));
             ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true;
 
             XmlConfigurator.Configure();
@@ -25,6 +26,7 @@ namespace TestAppUsingNugetPackage
                 log.Info(data);
                 log.Warn("As a string: " + firstPart);
             }
+            // ReSharper disable once FunctionNeverReturns // on purpose...
         }
 
         private static void ManuallyConfigureSplunkAppender()

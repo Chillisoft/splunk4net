@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using PeanutButter.TestUtils.Generic;
 
-namespace splunk4net.Tests
+namespace splunk4net.Tests.Splunk
 {
     [TestFixture]
     public class TestLenientAutoLocker
@@ -37,6 +37,7 @@ namespace splunk4net.Tests
                     {
                         barrier.SignalAndWait();
                         Thread.Sleep(1000);
+                        // ReSharper disable once AccessToDisposedClosure
                         gotLock = semaphore.Wait(100);
                     });
                     //---------------Execute Test ----------------------

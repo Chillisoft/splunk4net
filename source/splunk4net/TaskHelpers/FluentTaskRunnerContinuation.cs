@@ -5,9 +5,9 @@ namespace splunk4net.TaskHelpers
 {
     public class FluentTaskRunnerContinuation<T> : IFluentTaskRunnerContinuation<T>
     {
-        private ITaskRunner _taskRunner;
-        private Task _initialWithoutResult;
-        private Task<T> _initialWithResult;
+        private readonly ITaskRunner _taskRunner;
+        private readonly Task _initialWithoutResult;
+        private readonly Task<T> _initialWithResult;
 
         public FluentTaskRunnerContinuation(Task initialWithoutResult, ITaskRunner taskRunner)
         {

@@ -1,10 +1,11 @@
 using System;
+using log4net.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace splunk4net
 {
-    public class JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects : JsonConverter
+    public class JsonConverterWhichProducesHierachicalOutputOnLog4NetMessageObjects : JsonConverter
     {
         // log4net is designed more around flat data, but Splunk deals well with heirachies, so 
         //  this class ensures that complex objects which were logged in the calling app are
@@ -17,8 +18,16 @@ namespace splunk4net
                 // if the message object is complex, ensure that it's written heirachically, or fall back on whatever was there to start with
                 var propInfo = value.GetType().GetProperty("MessageObject");
                 var propVal = propInfo.GetValue(value);
-                var replace = JObject.FromObject(propVal);
-                jToken["Message"] = replace;
+                var asStringFormat = propVal as SystemStringFormat;
+                if (asStringFormat != null)
+                {
+                    jToken["Message"] = asStringFormat.ToString();
+                }
+                else
+                {
+                    var replace = JObject.FromObject(propVal);
+                    jToken["Message"] = replace;
+                }
             }
             catch
             {

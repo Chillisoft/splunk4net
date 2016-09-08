@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace splunk4net.Buffering
 {
     public class LogBufferItemRepositoryInMemory: ILogBufferItemRepository
     {
-        private List<ILogBufferItem> _buffer;
-        private object _lock;
+        private readonly List<ILogBufferItem> _buffer;
+        private readonly object _lock;
         private int _lastId;
 
         public LogBufferItemRepositoryInMemory()

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.IO;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net.Appender;
@@ -16,6 +13,10 @@ using splunk4net.Timers;
 
 namespace splunk4net
 {
+    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+    [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class SplunkAppender: AppenderSkeleton
     {
 
@@ -26,35 +27,22 @@ namespace splunk4net
         public int MaxStore { get; set; }
         public bool StoreForward { get; set; }
 
+        private SemaphoreSlim _lock = new SemaphoreSlim(1);
+        private Task<AsyncLogResult> _lastSplunkTask;
+        private readonly ITaskRunner _taskRunner;
+        private readonly ISplunkWriterFactory _splunkWriterFactory;
+        private readonly ILogBufferItemRepository _bufferItemRepository;
+        private ITimer _timer;
+        private bool _splunkConfigured;
+        private readonly ITimerFactory _timerFactory;
+        private const int TEN_MINUTES = 600000;
+
         public SplunkAppender(): this(new TaskRunner(),
                                         new SplunkWriterFactory(), 
                                         new LogBufferItemRepositoryFactory(), 
                                         new TimerFactory())
         {
         }
-
-        private static string GetBufferDatabasePathForApplication()
-        {
-            // this only works for actual apps: NUnit running through R# will b0rk
-            //  as there is no EntryAssembly, apparently
-            var entryPath = Assembly.GetEntryAssembly().CodeBase;
-            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var bufferBase = Path.Combine(appDataPath, "LogBuffer");
-            var md5 = MD5.Create();
-            var dbName = string.Join("", md5.ComputeHash(Encoding.UTF8.GetBytes(entryPath))
-                                .Select(b => b.ToString("X2"))) + ".db";
-            return Path.Combine(bufferBase, dbName);
-        }
-
-        private SemaphoreSlim _lock = new SemaphoreSlim(1);
-        private Task<AsyncLogResult> _lastSplunkTask;
-        private readonly ITaskRunner _taskRunner;
-        private readonly ISplunkWriterFactory _splunkWriterFactory;
-        private ILogBufferItemRepository _bufferItemRepository;
-        private ITimer _timer;
-        private bool _splunkConfigured;
-        private ITimerFactory _timerFactory;
-        private const int TEN_MINUTES = 600000;
 
         internal SplunkAppender(ITaskRunner taskRunner,
                                 ISplunkWriterFactory splunkWriterFactory, 
@@ -94,7 +82,11 @@ namespace splunk4net
             {
                 action();
             }
-            catch { }
+            // ReSharper disable once EmptyGeneralCatchClause
+            catch
+            {
+                /* This method is just to suppress exceptions; at worst, this means lost logs and logging should never bring down an app */
+            }
         }
 
         protected override void Append(LoggingEvent loggingEvent)
@@ -108,7 +100,7 @@ namespace splunk4net
 
         private static string ConvertToJsonWithComplexMessageObjectsHandledProperly(LoggingEvent loggingEvent)
         {
-            return JsonConvert.SerializeObject(loggingEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects());
+            return JsonConvert.SerializeObject(loggingEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4NetMessageObjects());
         }
 
         private void DoFirstTimeInitializations()

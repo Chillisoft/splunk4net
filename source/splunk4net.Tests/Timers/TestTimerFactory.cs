@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using NUnit.Framework;
-using PeanutButter.RandomGenerators;
 using PeanutButter.TestUtils.Generic;
 using splunk4net.Timers;
 
@@ -22,6 +17,7 @@ namespace splunk4net.Tests.Timers
             //---------------Assert Precondition----------------
 
             //---------------Execute Test ----------------------
+            // ReSharper disable once ObjectCreationAsStatement
             Assert.DoesNotThrow(() => new TimerFactory());
 
             //---------------Test Result -----------------------

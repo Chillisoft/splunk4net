@@ -9,26 +9,25 @@ using Newtonsoft.Json;
 using NSubstitute;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
-using PeanutButter.Utils;
 using splunk4net.Buffering;
 using splunk4net.Splunk;
 using splunk4net.TaskHelpers;
 using splunk4net.Timers;
 
-namespace splunk4net.Tests
+namespace splunk4net.Tests.Splunk
 {
     [TestFixture]
     public class TestSplunkAppender
     {
         private string _dbPath;
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void TestFixtureSetup()
         {
             _dbPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), ".db");
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TestFixtureTeardown()
         {
             try
@@ -37,6 +36,7 @@ namespace splunk4net.Tests
             }
             catch
             {
+                /* do nothing, on purpose */
             }
         }
 
@@ -62,7 +62,7 @@ namespace splunk4net.Tests
             sut.DoAppend(loggingEvent);
 
             //---------------Test Result -----------------------
-            db.Received().Buffer(JsonConvert.SerializeObject(loggingEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects()));
+            db.Received().Buffer(JsonConvert.SerializeObject(loggingEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4NetMessageObjects()));
         }
 
         private static LoggingEvent CreateRandomLoggingEvent(string message = null)
@@ -106,7 +106,7 @@ namespace splunk4net.Tests
             var writer = Substitute.For<ISplunkWriter>();
             factory.CreateFor(sut.Name).ReturnsForAnyArgs(ci => writer);
             writer.Log(Arg.Any<string>())
-                .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor<bool>(() => true));
+                .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor(() => true));
 
             //---------------Assert Precondition----------------
 
@@ -119,7 +119,7 @@ namespace splunk4net.Tests
             writer.DidNotReceive().Log(Arg.Any<string>());
             logTask.Start();
             firstBarrier.SignalAndWait();
-            writer.Received().Log(JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects()));
+            writer.Received().Log(JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4NetMessageObjects()));
             db.DidNotReceive().Unbuffer(Arg.Any<long>());
         }
 
@@ -139,9 +139,9 @@ namespace splunk4net.Tests
             var writer = Substitute.For<ISplunkWriter>();
             factory.CreateFor(sut.Name).ReturnsForAnyArgs(ci => writer);
             writer.Log(Arg.Any<string>())
-                .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor<bool>(() => true));
+                .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor(() => true));
             var logEvent = CreateRandomLoggingEvent();
-            var json = JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects());
+            var json = JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4NetMessageObjects());
             var bufferId = RandomValueGen.GetRandomLong(100, 200);
             db.Buffer(json).Returns(bufferId);
 
@@ -176,9 +176,9 @@ namespace splunk4net.Tests
             var writer = Substitute.For<ISplunkWriter>();
             factory.CreateFor(sut.Name).ReturnsForAnyArgs(ci => writer);
             writer.Log(Arg.Any<string>())
-                .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor<bool>(() => false));
+                .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor(() => false));
             var logEvent = CreateRandomLoggingEvent();
-            var json = JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects());
+            var json = JsonConvert.SerializeObject(logEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4NetMessageObjects());
             var bufferId = RandomValueGen.GetRandomLong(100, 200);
             db.Buffer(json).Returns(bufferId);
 
@@ -215,11 +215,11 @@ namespace splunk4net.Tests
             var writer = Substitute.For<ISplunkWriter>();
             factory.CreateFor(sut.Name).ReturnsForAnyArgs(ci => writer);
             writer.Log(Arg.Any<string>())
-                .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor<bool>(() => true));
+                .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor(() => true));
             var firstLogEvent = CreateRandomLoggingEvent("log1");
             var secondLogEvent = CreateRandomLoggingEvent("log2");
-            var json1 = JsonConvert.SerializeObject(firstLogEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects());
-            var json2 = JsonConvert.SerializeObject(secondLogEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4netMessageObjects());
+            var json1 = JsonConvert.SerializeObject(firstLogEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4NetMessageObjects());
+            var json2 = JsonConvert.SerializeObject(secondLogEvent, Formatting.None, new JsonConverterWhichProducesHierachicalOutputOnLog4NetMessageObjects());
             db.Buffer(Arg.Any<string>()).ReturnsForAnyArgs(ci =>
             {
                 var data = ci.Arg<string>();
@@ -255,7 +255,7 @@ namespace splunk4net.Tests
             var factory = Substitute.For<ISplunkWriterFactory>();
             var writer = Substitute.For<ISplunkWriter>();
             writer.Log(Arg.Any<string>())
-                .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor<bool>(() => true));
+                .ReturnsForAnyArgs(ci => ImmediateTaskRunnerBuilder.CreateImmediateTaskFor(() => true));
             var timer = Substitute.For<ITimer>();
             var configuredInterval = 0;
             Action configuredAction = null;
@@ -330,6 +330,7 @@ namespace splunk4net.Tests
                                         ILogBufferItemRepositoryFactory bufferItemRepositoryFactory = null,
                                         ITimerFactory timerFactory = null)
         {
+            // ReSharper disable once UseObjectOrCollectionInitializer
             var splunkAppender = new SplunkAppender(taskRunner ?? CreateImmediateTaskRunner(),
                 factory ?? Substitute.For<ISplunkWriterFactory>(),
                 bufferItemRepositoryFactory ?? Substitute.For<ILogBufferItemRepositoryFactory>(),

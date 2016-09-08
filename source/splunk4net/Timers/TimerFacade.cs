@@ -4,7 +4,7 @@ namespace splunk4net.Timers
 {
     public class TimerFacade: ITimer
     {
-        private Timer _actual;
+        private readonly Timer _actual;
 
         public TimerFacade(Timer actual)
         {

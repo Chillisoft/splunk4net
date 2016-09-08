@@ -12,7 +12,7 @@ namespace splunk4net.Splunk
 
     public class SplunkWriter: ISplunkWriter
     {
-        public IEnumerable<SplunkWriterConfig> InstanceConfigurations { get { return _instanceConfigurations; }}
+        public IEnumerable<SplunkWriterConfig> InstanceConfigurations => _instanceConfigurations;
         private readonly SplunkWriterConfig[] _instanceConfigurations;
 
         public SplunkWriter(SplunkWriterConfig[] configurations)

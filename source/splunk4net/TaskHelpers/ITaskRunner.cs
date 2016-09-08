@@ -8,6 +8,7 @@ namespace splunk4net.TaskHelpers
     {
         Task Run(Action action);
         Task<T> Run<T>(Func<T> func);
+        // ReSharper disable once UnusedMember.Global
         Task RunLong(Action action, CancellationToken? token = null);
         Task<T> CreateNotStartedFor<T>(Func<T> func, CancellationToken? cancellationToken = null);
         Task CreateNotStartedFor(Action action, CancellationToken? cancellationToken = null);

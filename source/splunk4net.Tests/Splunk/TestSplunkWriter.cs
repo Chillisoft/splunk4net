@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -10,8 +8,12 @@ using NUnit.Framework;
 using PeanutButter.RandomGenerators;
 using splunk4net.Splunk;
 using Splunk.Client;
+// ReSharper disable PossibleNullReferenceException
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
-namespace splunk4net.Tests
+// ReSharper disable MemberCanBePrivate.Global
+
+namespace splunk4net.Tests.Splunk
 {
     [TestFixture]
     public class TestSplunkWriter
@@ -19,10 +21,10 @@ namespace splunk4net.Tests
         [SetUp]
         public void SetUp()
         {
-            DisableSSLCertificateExceptions();
+            DisableSslCertificateExceptions();
         }
 
-        private static void DisableSSLCertificateExceptions()
+        private static void DisableSslCertificateExceptions()
         {
             ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true;
         }
@@ -54,16 +56,6 @@ namespace splunk4net.Tests
             Assert.AreEqual(indexName, configuredWith.IndexName);
             Assert.AreEqual(login, configuredWith.Login);
             Assert.AreEqual(password, configuredWith.Password);
-        }
-
-        public class ObjectWrapper
-        {
-            public ObjectWrapper(object toWrap)
-            {
-                Wrapped = toWrap;
-            }
-
-            public object Wrapped { get; private set; }
         }
 
         [Test]
@@ -103,7 +95,7 @@ namespace splunk4net.Tests
 
         [Test]
         [Ignore("Integration: requires local instance of Splunk to work")]
-        public async void Log_WhenCanConnectToSplunk_ShouldLogAccordingToProvidedConfiguration()
+        public async Task Log_WhenCanConnectToSplunk_ShouldLogAccordingToProvidedConfiguration()
         {
             //---------------Set up test pack-------------------
             var indexName = "splunk4net";
@@ -148,7 +140,7 @@ namespace splunk4net.Tests
                 }
                 Thread.Sleep(1000);
             }
-            throw new Exception(string.Format("timed out looking for {0} results for search '{1}'", expected, search));
+            throw new Exception($"timed out looking for {expected} results for search '{search}'");
         }
 
         private static async Task<Service> CreateLoggedOnSplunkServiceForIndex(string indexName)

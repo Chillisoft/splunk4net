@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace splunk4net.Splunk
 {
@@ -19,6 +20,7 @@ namespace splunk4net.Splunk
             }
         }
 
+        // ReSharper disable once UnusedMember.Global
         public void ForgetConfigurations()
         {
             lock(_lock)

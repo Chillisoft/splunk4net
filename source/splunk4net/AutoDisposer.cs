@@ -7,13 +7,13 @@ namespace splunk4net
     //  I just don't want to add a package dependency for one class
     public class AutoDisposer: IDisposable
     {
-        private object _lock = new object();
-        private List<IDisposable> _disposables = new List<IDisposable>();
+        private readonly object _lock = new object();
+        private readonly List<IDisposable> _disposables = new List<IDisposable>();
         public void Dispose()
         {
             Action<IDisposable> tryDispose = toDispose =>
             {
-                try { toDispose.Dispose(); } catch { }
+                try { toDispose.Dispose(); } catch { /* do nothing, on purpose */ }
             };
             lock(_lock)
             {

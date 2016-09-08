@@ -6,10 +6,11 @@ using log4net.Repository.Hierarchy;
 
 namespace TestAppWithNoDirectReferences
 {
-    class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
+            if (args == null) throw new ArgumentNullException(nameof(args));
             ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, errors) => true;
 
             XmlConfigurator.Configure();
@@ -20,6 +21,8 @@ namespace TestAppWithNoDirectReferences
             Console.WriteLine("Write lines to log or Ctrl-C to quit");
             while(true)
             {
+                log.Info("Some string");
+                log.InfoFormat("The cow says \"{0}\"", "moo");
                 var firstPart = Console.ReadLine();
                 var data = new Data() { FirstPart = firstPart, SecondPart = "bar", Child = new Data() { FirstPart = "first", SecondPart = "second" }}; 
                 log.Info(data);

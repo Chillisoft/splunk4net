@@ -7,6 +7,7 @@ using System.Threading;
 using NUnit.Framework;
 using PeanutButter.RandomGenerators;
 using splunk4net.Buffering;
+// ReSharper disable PossibleMultipleEnumeration
 
 namespace splunk4net.Tests.Buffering
 {
@@ -25,7 +26,7 @@ namespace splunk4net.Tests.Buffering
 
             //---------------Test Result -----------------------
             Assert.IsTrue(File.Exists(sut1.BufferDatabasePath));
-            using (var connection = new SQLiteConnection(String.Format("Data source={0};Version=3", sut1.BufferDatabasePath)))
+            using (var connection = new SQLiteConnection($"Data source={sut1.BufferDatabasePath};Version=3"))
             {
                 Assert.DoesNotThrow(() => connection.Open());
                 using (var cmd = connection.CreateCommand())
@@ -277,7 +278,7 @@ namespace splunk4net.Tests.Buffering
 
         }
 
-        private List<string> _toDelete = new List<string>();
+        private readonly List<string> _toDelete = new List<string>();
         private LogBufferItemRepositorySqlite Create(string id = null)
         {
             var dbPath = Path.Combine(Path.GetTempPath(), (id ?? Guid.NewGuid() + ".db"));
@@ -285,12 +286,12 @@ namespace splunk4net.Tests.Buffering
             return new LogBufferItemRepositorySqlite(dbPath);
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void TestFixtureTearDown()
         {
             _toDelete.ForEach(p =>
             {
-                try { File.Delete(p); } catch {}
+                try { File.Delete(p); } catch { /* do nothing, on purpose */ }
             });
         }
     }
